@@ -26,7 +26,11 @@ struct Menu : public VStack {
 	void select_move(vb::Direc);
 	void set_select(const int);
 	void add_item(std::string);
-	sf::Vector2f get_position_of_item(const int index);
+	sf::Vector2f get_position_of_item(const int);
+	void check_item(const int&);
+	bool item_is_checked(const int&);
+	int get_index_to_first_checked_item();
+	int get_index_to_last_unchecked_item();
 
 	void update(float);
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const;

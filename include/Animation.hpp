@@ -258,6 +258,9 @@ struct PositionAnimation : public Animation {
 		pos_A(a), pos_B(b),
 		home(a), target(b)
 	{
+		rate = 2.0;
+		f 			= [](float x) { return pow(-pow(1/(x/2 + 0.5) - 1, 3) + 1, 3); }; // fluid transition
+		inversef = [](float x) { return 2/((cbrt(cbrt(-x) + 1)) + 1) - 1; }; // its inverse
 	}
 
 

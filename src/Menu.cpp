@@ -1,7 +1,9 @@
 #include <Menu.hpp>
 #include <Program.hpp>
+#include <Item.hpp>
 #include <Text.hpp>
 #include <Shapes.hpp>
+#include <Button.hpp>
 #include <algorithm>
 #include <sstream>
 #include <iomanip>
@@ -14,18 +16,25 @@ Menu::Menu(vb::Transform _tf, int _padding)
 	select_rect.setFillColor(sf::Color(60,60,60));
 
 	// Hard code the items in the checklist
-	add_item("Jonathan");
-	add_item("Blow");
-	add_item("is");
-	add_item("the");
-	add_item("GOAT.");
+	add_item("clean the kitchen");
+	add_item("make your bed");
+	add_item("finish homework");
+	add_item("take the dog for a walk");
+	add_item("buy groceries");
+
+	add_item("buy Uncharted 2");
+	add_item("push new changes to git");
+	add_item("play 3 scary itch.io games");
+	add_item("email Pauline back");
+	add_item("head to the office");
 
 	VStack::update(0.0f);
 }
 
 
 void Menu::add_item(const std::string message){
-	insert(-1, new HStack(tf, 10, std::vector<Entity*>{new BorderedCircle(tf, 40, 2), new Text(message)}));
+	//insert(-1, new Item(tf, message, 10));
+	insert(-1, new HStack(tf, 10, std::vector<Entity*>{new Button(tf), new Text(message)}));
 }
 
 
@@ -66,6 +75,36 @@ sf::Vector2f Menu::get_position_of_item(const int index){
 }
 
 
+void Menu::check_item(const int &index){
+	//((Item*)entities[select_index])->check();
+	HStack* item = (HStack*)entities[index];
+	((Button*)item->entities[0])->press(); // 0, because the button the first element in the item hstack.
+	((Text*)item->entities[1])->dimmer(); // 0, because the button the first element in the item hstack.
+}
+
+bool Menu::item_is_checked(const int &index){
+	HStack* item = (HStack*)entities[index];
+	return ((Button*)item->entities[0])->is_activated();
+}
+
+
+int Menu::get_index_to_first_checked_item(){
+	for (int i = 0; i < size; ++i){
+		HStack* item = (HStack*)entities[i];
+		if (((Button*)item->entities[0])->is_activated()){ // 0, because the button the first element in the item hstack.
+			return i;
+		}
+	}
+	return size; // no checked item was found; return the last index.
+}
+
+
+int Menu::get_index_to_last_unchecked_item(){
+	return get_index_to_first_checked_item()-1;
+}
+
+
+
 
 void Menu::update(float dt){
 	select_rect.setPosition(get_position_of_item(select_index));
@@ -76,7 +115,6 @@ void Menu::update(float dt){
 	}
 
    VStack::update(dt);
-
 }
 
 
@@ -104,42 +142,60 @@ bool Menu::handler(sf::Event& event, Program& p){
 
 
 		case sf::Keyboard::Enter: // duplicate currently selected alarm
-			if (!elements_currently_static){
-
-				for (auto &anim : animations){
-					anim.boomerang();
-				}
-
-				auto it = entities.begin() + select_index;
-				if (animations[0].forw){ // use the first animation as a proxy for the rest
-					// @NOTE: this only works when we know all the animations complete at the same time.
-					std::rotate(it, it+1, entities.end());
-				} else {
-					std::rotate(it, --entities.end(), entities.end());
-				}
-
-
-			} else {
+			if (elements_currently_static){
 				animations.clear();
-				for (int i = select_index; i < size; ++i){
-					sf::Vector2f current_item_position = get_position_of_item(i);
-					sf::Vector2f last_item_position = get_position_of_item((i == select_index) ? size-1 : i-1);
-					PositionAnimation anim = PositionAnimation(entities[i], current_item_position, last_item_position);
-					anim.rate = 1.5;
-					anim.f 			= [](float x) { return pow(-pow(1/(x/2 + 0.5) - 1, 3) + 1, 3); }; // fluid transition
-					anim.inversef 	= [](float x) { return 2/((cbrt(cbrt(-x) + 1)) + 1) - 1; }; // its inverse
-					anim.start();
-					animations.push_back(std::move(anim));
+
+				if (item_is_checked(select_index)){ // UNCHECKING AN ITEM
+					int first_checked_index = get_index_to_first_checked_item();
+
+					if (select_index == first_checked_index){
+						check_item(select_index);
+						return true;
+					}
+
+					for (int i = first_checked_index; i <= select_index; ++i){
+						sf::Vector2f A = get_position_of_item(i);
+						sf::Vector2f B = get_position_of_item((i == select_index) ? first_checked_index : i+1);
+						PositionAnimation anim = PositionAnimation(entities[i], A, B);
+						anim.start();
+						animations.push_back(std::move(anim));
+					}
+					
+					check_item(select_index);
+
+					auto it = entities.begin() + select_index;
+					std::rotate(entities.begin() + first_checked_index, it, it+1);
+
+
+				} else { // CHECKING AN ITEM
+					int last_unchecked_index = get_index_to_last_unchecked_item();
+
+					if (select_index == last_unchecked_index){
+						check_item(select_index);
+						return true;
+					}
+
+					for (int i = select_index; i <= last_unchecked_index; ++i){
+						sf::Vector2f A = get_position_of_item(i);
+						sf::Vector2f B = get_position_of_item((i == select_index) ? last_unchecked_index : i-1);
+						PositionAnimation anim = PositionAnimation(entities[i], A, B);
+						anim.start();
+						animations.push_back(std::move(anim));
+					}
+
+					check_item(select_index);
+
+					auto it = entities.begin() + select_index;
+					std::rotate(it, it+1, entities.begin() + last_unchecked_index+1);
 				}
 
-				auto it = entities.begin() + select_index;
-				std::rotate(it, it+1, entities.end());
 
 				animations[0].lambda_complete = [&](){
 					elements_currently_static = true;
 				};
 
 				elements_currently_static = false;
+
 			}
 
 			return true;

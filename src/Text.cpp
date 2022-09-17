@@ -1,5 +1,10 @@
 #include <Text.hpp>
 
+
+int Text::DIM_ALPHA = 40;
+
+
+
 Text::Text(std::string _content, vb::Transform _tf, int _fontsize, sf::Font& _font)
 	: Entity(_tf)
 {
@@ -32,6 +37,13 @@ void Text::center_xaxis(){
 void Text::center_yaxis(){
 	//sf::FloatRect bounds = txt.getLocalBounds();
 	txt.setOrigin(0, (int) max_bounds.height/2 + max_bounds.top - 1);
+}
+
+void Text::dimmer(){
+	// Toggles text between dimmed & opaque.
+	sf::Color color = txt.getFillColor();
+	color.a = (color.a == Text::DIM_ALPHA) ? 255 : Text::DIM_ALPHA;
+	set_color(color);
 }
 
 void Text::update(float dt){

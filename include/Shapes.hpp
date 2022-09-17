@@ -1,5 +1,6 @@
 #pragma once
 #include <vb.hpp>
+#include <Entity.hpp>
 
 
 struct BorderedRect : public Entity {
@@ -43,6 +44,7 @@ struct BorderedCircle : public Entity {
 		circle.setRadius(actual_rad);
 		circle.setPointCount(30);
 		circle.setOrigin(-bw, -bw);
+		//circle.setOrigin(rad, rad);
 		circle.setFillColor(sf::Color::Transparent);
 
 		circle.setOutlineThickness(bw);
