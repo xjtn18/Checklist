@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <sstream>
 #include <iomanip>
+#include <unordered_set>
 
 
 
@@ -16,19 +17,24 @@ Menu::Menu(vb::Transform _tf, int _padding)
 	select_rect.setFillColor(sf::Color(60,60,60));
 
 	// Hard code the items in the checklist
-	add_item("clean the kitchen");
-	add_item("make your bed");
-	add_item("finish homework");
-	add_item("take the dog for a walk");
-	add_item("buy groceries");
+	add_item("allow concurrent checks");
+	add_item("integrate text boxs to edit items");
+	add_item("change the color scheme");
+	add_item("lerp the text opacity of checked/unchecked items");
 
-	add_item("buy Uncharted 2");
-	add_item("push new changes to git");
-	add_item("play 3 scary itch.io games");
-	add_item("email Pauline back");
-	add_item("head to the office");
+	add_item("watch the minions: rise of gru (important)");
+	add_item("Sawayama solitaire is much more tactical.");
+	add_item("It's a great spin on klondike");
+	add_item("Proletariats Patience is rewarding and fun");
+
+
+	add_item(":) Master Chief");
+	add_item("High Charity");
+	add_item("Truth, Mercy, and Regret");
+	add_item("Halo 3 has the best soundtrack");
 
 	VStack::update(0.0f);
+
 }
 
 
@@ -71,6 +77,11 @@ void Menu::set_selector(int index){
 
 
 sf::Vector2f Menu::get_position_of_item(const int index){
+	return sf::Vector2f(tf.x, tf.y + entities[index]->tf.h * index + (padding * index));
+}
+
+
+sf::Vector2f Menu::get_position_of_entity(const int index){
 	return sf::Vector2f(entities[index]->tf.x, entities[index]->tf.y);
 }
 
@@ -105,14 +116,33 @@ int Menu::get_index_to_last_unchecked_item(){
 
 
 
-
-void Menu::update(float dt){
-	select_rect.setPosition(get_position_of_item(select_index));
-	select_rect.setSize(sf::Vector2f(entities[select_index]->tf.w, entities[select_index]->tf.h));
-
+void Menu::process_animations(float dt){
 	for (auto &anim : animations){
 		anim.step(dt);
 	}
+}
+
+
+void Menu::delete_stale_animations(){
+	std::unordered_set<Entity*> addresses;
+
+	for (int i = animations.size()-1; i >= 0; --i){
+		if (addresses.count(animations[i].entity)){
+			animations.erase(animations.begin() + i);
+		} else {
+			addresses.insert(animations[i].entity);
+		}
+	}
+
+}
+
+
+
+void Menu::update(float dt){
+	select_rect.setPosition(get_position_of_entity(select_index));
+	select_rect.setSize(sf::Vector2f(entities[select_index]->tf.w, entities[select_index]->tf.h));
+
+	process_animations(dt);
 
    VStack::update(dt);
 }
@@ -142,61 +172,58 @@ bool Menu::handler(sf::Event& event, Program& p){
 
 
 		case sf::Keyboard::Enter: // duplicate currently selected alarm
-			if (elements_currently_static){
-				animations.clear();
+			delete_stale_animations();
 
-				if (item_is_checked(select_index)){ // UNCHECKING AN ITEM
-					int first_checked_index = get_index_to_first_checked_item();
+			if (item_is_checked(select_index)){ // UNCHECKING AN ITEM
+				int first_checked_index = get_index_to_first_checked_item();
 
-					if (select_index == first_checked_index){
-						check_item(select_index);
-						return true;
-					}
-
-					for (int i = first_checked_index; i <= select_index; ++i){
-						sf::Vector2f A = get_position_of_item(i);
-						sf::Vector2f B = get_position_of_item((i == select_index) ? first_checked_index : i+1);
-						PositionAnimation anim = PositionAnimation(entities[i], A, B);
-						anim.start();
-						animations.push_back(std::move(anim));
-					}
-					
+				if (select_index == first_checked_index){
 					check_item(select_index);
-
-					auto it = entities.begin() + select_index;
-					std::rotate(entities.begin() + first_checked_index, it, it+1);
-
-
-				} else { // CHECKING AN ITEM
-					int last_unchecked_index = get_index_to_last_unchecked_item();
-
-					if (select_index == last_unchecked_index){
-						check_item(select_index);
-						return true;
-					}
-
-					for (int i = select_index; i <= last_unchecked_index; ++i){
-						sf::Vector2f A = get_position_of_item(i);
-						sf::Vector2f B = get_position_of_item((i == select_index) ? last_unchecked_index : i-1);
-						PositionAnimation anim = PositionAnimation(entities[i], A, B);
-						anim.start();
-						animations.push_back(std::move(anim));
-					}
-
-					check_item(select_index);
-
-					auto it = entities.begin() + select_index;
-					std::rotate(it, it+1, entities.begin() + last_unchecked_index+1);
+					return true;
 				}
 
+				for (int i = first_checked_index; i <= select_index; ++i){
+					sf::Vector2f A = get_position_of_entity(i);
+					sf::Vector2f B = get_position_of_item((i == select_index) ? first_checked_index : i+1);
+					PositionAnimation anim = PositionAnimation(entities[i], A, B);
+					anim.start();
+					animations.push_back(std::move(anim));
+				}
 
-				animations[0].lambda_complete = [&](){
-					elements_currently_static = true;
-				};
+				check_item(select_index);
 
-				elements_currently_static = false;
+				auto it = entities.begin() + select_index;
+				std::rotate(entities.begin() + first_checked_index, it, it+1);
+
+
+			} else { // CHECKING AN ITEM
+				int last_unchecked_index = get_index_to_last_unchecked_item();
+
+				if (select_index == last_unchecked_index){
+					check_item(select_index);
+					return true;
+				}
+
+				for (int i = select_index; i <= last_unchecked_index; ++i){
+					sf::Vector2f A = get_position_of_entity(i);
+					sf::Vector2f B = get_position_of_item((i == select_index) ? last_unchecked_index : i-1);
+					PositionAnimation anim = PositionAnimation(entities[i], A, B);
+					anim.start();
+					animations.push_back(std::move(anim));
+				}
+
+				check_item(select_index);
+
+				auto it = entities.begin() + select_index;
+				std::rotate(it, it+1, entities.begin() + last_unchecked_index+1);
 
 			}
+
+			animations[0].lambda_complete = [&](){
+				//elements_currently_static = true;  // NOTE: caused bug where elements were snapping to their destination.
+			};
+
+			elements_currently_static = false;
 
 			return true;
 		}

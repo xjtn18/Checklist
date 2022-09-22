@@ -25,7 +25,7 @@ Program::Program()
 
 	// Set the Icon
 	sf::Image icon;
-	icon.loadFromFile("res/images/clock-logo.png");
+	icon.loadFromFile("res/images/icon.png");
 	window_ptr->setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
 	window_ptr->setFramerateLimit(120);
 
@@ -43,6 +43,7 @@ Program::Program()
 
 	set_pane_main();
 }
+
 
 
 
