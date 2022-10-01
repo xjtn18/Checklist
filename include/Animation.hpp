@@ -17,18 +17,20 @@ struct Animation {
 	std::function<void(void)> lambda_complete;
 	bool reached_destination;
 	bool dead;			// the active state of the animation.
+	int delay_target;
 
 	Animation()
 		: x(0),
-			y(0),
-			target(1),
-			rate(1.0),
-			f([](float x) -> float {return 1.0f;}),
-			inversef([](float x) -> float {return 0.0f;}),
-			stepper([](float x) -> void {}),
-			lambda_complete([]() -> void {}),
-			reached_destination(false),
-			dead(true)
+		  y(0),
+		  target(1),
+		  rate(1.0),
+		  f([](float x) -> float {return 1.0f;}),
+		  inversef([](float x) -> float {return 0.0f;}),
+		  stepper([](float x) -> void {}),
+		  lambda_complete([]() -> void {}),
+		  reached_destination(false),
+		  dead(true),
+		  delay_target(0)
 	{ }
 
 	virtual ~Animation()
@@ -46,6 +48,10 @@ struct Animation {
 	}
 
 	void tick(float dt){
+		if (delay_target > 0){
+			--delay_target;
+			return;
+		}
 		x += (rate * dt);
 		bool clamped = anim_clamp(x, 0, target + 0.001);
 		if (clamped){
@@ -108,64 +114,8 @@ struct AnimationChain : public Animation {
 
 
 
-/*
-struct PositionAnimation : public Animation {
-	///// Members /////
-	sf::Transformable *polygon;
-	sf::Vector2f pos_A, pos_B; // two positions that the animation transitions between
-	sf::Vector2f home, target; // specifies which of the 2 locations is home and which is target.
-	bool forw = false; // animation is travelling A -> B
-	///////////////////
-
-	PositionAnimation() : polygon(nullptr) { }
-
-	PositionAnimation(sf::Transformable *poly, sf::Vector2f a, sf::Vector2f b)
-		: Animation(),
-		polygon(poly),
-		pos_A(a), pos_B(b),
-		home(a), target(b)
-	{
-	}
-
-
-	void forward(){
-		home = pos_A;
-		target = pos_B;
-		if (is_alive()){
-			if (!forw){
-				interrupt();
-			}
-		} else if (!forw) {
-			start();
-		}
-		forw = true;
-	}
-
-
-	void back(){
-		home = pos_B;
-		target = pos_A;
-		if (is_alive()){
-			if (forw){
-				interrupt();
-			}
-		} else if (forw) {
-			start();
-		}
-		forw = false;
-	}
-
-
-	virtual void step(float dt) override {
-		if (is_alive()){
-			Animation::step(dt); // calculate the new y
-			polygon->setPosition(get_intermediate_position(home, target, y));
-		}
-	}
-
+struct OpacityAnimation : public Animation {
 };
-
-*/
 
 
 

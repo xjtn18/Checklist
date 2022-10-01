@@ -27,7 +27,7 @@ Program::Program()
 	sf::Image icon;
 	icon.loadFromFile("res/images/icon.png");
 	window_ptr->setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
-	window_ptr->setFramerateLimit(120);
+	window_ptr->setFramerateLimit(240);
 
 	// Load all UI entities at program start that can be created now,
 	// regardless of whether or not they appear in the initial pane (draw_list).
