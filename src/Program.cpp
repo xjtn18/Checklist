@@ -116,7 +116,7 @@ void Program::mainloop(){
 	sf::Clock clock;
 
 	while (running && window.isOpen()) {
-		window.clear(VBC_BG); // clear last frame and set bg color
+		window.clear(COLOR_BG); // clear last frame and set bg color
 
 		bool event_processed = false;
 		sf::Event event;

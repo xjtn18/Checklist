@@ -7,31 +7,40 @@
 using namespace vb;
 
 
+template <typename T>
 struct Animation {
 	float x, y; 			// marks current time in the animation :/: marks the stage of the animation.
 	float target;		// determines what the last stage will be.
 	float rate;			// determines how quickly the animation will run.
+	bool reached_destination;
+	bool dead;			// the active state of the animation.
+	bool forw = true; // animation is travelling A -> B
+	int delay;
+	T home, end;
 	std::function<float(float)> f;			// function that maps x to the position in the animation.
 	std::function<float(float)> inversef;	// function that maps y to a time in the animation.
 	std::function<void(float)> stepper;
 	std::function<void(void)> lambda_complete;
-	bool reached_destination;
-	bool dead;			// the active state of the animation.
-	int delay_target;
 
-	Animation()
+	Animation(){}
+
+	Animation(T _home, T _end)
 		: x(0),
 		  y(0),
 		  target(1),
 		  rate(1.0),
+		  home(_home),
+		  end(_end),
 		  f([](float x) -> float {return 1.0f;}),
 		  inversef([](float x) -> float {return 0.0f;}),
 		  stepper([](float x) -> void {}),
 		  lambda_complete([]() -> void {}),
 		  reached_destination(false),
 		  dead(true),
-		  delay_target(0)
-	{ }
+		  delay(0)
+	{
+		start();
+	}
 
 	virtual ~Animation()
 	{}
@@ -40,16 +49,21 @@ struct Animation {
 		dead = false;
 		reached_destination = false;
 		x = 0;
-		//rate = (rate < 0) ? -rate : rate; // set positive rate
 	}
 
 	void interrupt(){
 		x = inversef(1 - f(x));
 	}
 
+
+	void boomerang(){
+		(forw) ? back() : forward();
+	}
+
+
 	void tick(float dt){
-		if (delay_target > 0){
-			--delay_target;
+		if (delay > 0){
+			--delay;
 			return;
 		}
 		x += (rate * dt);
@@ -71,13 +85,45 @@ struct Animation {
 		if (is_alive()){
 			tick(dt);
 			stepper(y);
+			update(y);
 		}
+	}
+
+	virtual void update(float y) = 0;
+
+
+	void forward(){
+		std::swap(home, end);
+		if (is_alive()){
+			if (!forw){
+				interrupt();
+			}
+		} else if (!forw) {
+			start();
+		}
+		forw = true;
+	}
+
+
+	void back(){
+		std::swap(home, end);
+		if (is_alive()){
+			if (forw){
+				interrupt();
+			}
+		} else if (forw) {
+			start();
+		}
+		forw = false;
 	}
 
 };
 
 
 
+
+
+/*
 struct AnimationChain : public Animation {
 	std::vector<Animation> animations;
 	int current;
@@ -110,67 +156,24 @@ struct AnimationChain : public Animation {
 	}
 
 };
+*/
 
 
 
 
-struct OpacityAnimation : public Animation {
-};
 
 
-
-
-struct ScaleAnimation : public Animation {
+struct ScaleAnimation : public Animation<float> {
 	///// Members /////
 	sf::Transformable *polygon;
-	float scale_A, scale_B;
-	float home, target;
-	bool forw = false; // animation is scaling from A -> B
 	///////////////////
 
 	ScaleAnimation(sf::Transformable *poly, float a, float b)
-		: Animation(),
-		polygon(poly),
-		scale_A(a), scale_B(b),
-		home(scale_A), target(scale_B)
+		: Animation<float>(a, b),
+		polygon(poly)
 	{
 	}
 
-
-	void forward(){
-		home = scale_A;
-		target = scale_B;
-		if (is_alive()){
-			if (!forw){
-				interrupt();
-			}
-		} else if (!forw) {
-			start();
-		}
-		forw = true;
-	}
-
-
-	void back(){
-		home = scale_B;
-		target = scale_A;
-		if (is_alive()){
-			if (forw){
-				interrupt();
-			}
-		} else if (forw) {
-			start();
-		}
-		forw = false;
-	}
-
-	void boomerang(){
-		if (forw){
-			back();
-		} else {
-			forward();
-		}
-	}
 
 
 	virtual void step(float dt) override {
@@ -189,24 +192,66 @@ struct ScaleAnimation : public Animation {
 
 
 
+// TODO (jacob): Create a simple struct with a lerp function that uses the default x=y lerp function.
+//     We'll use this to animate the opacity of newly checked and unchecked items.
 
 
-
-struct PositionAnimation : public Animation {
+struct ColorAnimation : public Animation<sf::Color> {
 	///// Members /////
 	Entity *entity;
-	sf::Vector2f pos_A, pos_B; // two positions that the animation transitions between
-	sf::Vector2f home, target; // specifies which of the 2 locations is home and which is target.
-	bool forw = true; // animation is travelling A -> B
+	bool opacity_only;
+	///////////////////
+
+	ColorAnimation()
+		: entity(nullptr)
+	{ }
+
+	ColorAnimation(Entity *ent, sf::Color b, bool oo = false)
+		: Animation<sf::Color>(ent->color, b),
+		  entity(ent),
+		  opacity_only(oo)
+	{
+		setup();
+	}
+
+
+	ColorAnimation(Entity *ent, sf::Color a, sf::Color b, bool oo = false)
+		: Animation<sf::Color>(a, b),
+		  entity(ent),
+		  opacity_only(oo)
+	{
+		setup();
+	}
+
+	void setup(){
+		rate = 5.0;
+		f 			= [](float x) { return x; }; // linear 
+		inversef = [](float x) { return -x; }; // its inverse
+	}
+
+
+
+	virtual void update(float y) override {
+		entity->set_color(get_intermediate_color(home, end, y, opacity_only));
+	}
+};
+
+
+
+
+
+
+
+struct PositionAnimation : public Animation<sf::Vector2f> {
+	///// Members /////
+	Entity *entity;
 	///////////////////
 
 	PositionAnimation() : entity(nullptr) { }
 
 	PositionAnimation(Entity *ent, sf::Vector2f a, sf::Vector2f b)
-		: Animation(),
-		entity(ent),
-		pos_A(a), pos_B(b),
-		home(a), target(b)
+		: Animation<sf::Vector2f>(a, b),
+		  entity(ent)
 	{
 		rate = 2.0;
 		f 			= [](float x) { return pow(-pow(1/(x/2 + 0.5) - 1, 3) + 1, 3); }; // fluid transition
@@ -214,42 +259,8 @@ struct PositionAnimation : public Animation {
 	}
 
 
-	void forward(){
-		home = pos_A;
-		target = pos_B;
-		if (is_alive()){
-			if (!forw){
-				interrupt();
-			}
-		} else if (!forw) {
-			start();
-		}
-		forw = true;
-	}
-
-
-	void back(){
-		home = pos_B;
-		target = pos_A;
-		if (is_alive()){
-			if (forw){
-				interrupt();
-			}
-		} else if (forw) {
-			start();
-		}
-		forw = false;
-	}
-
-	void boomerang(){
-		(forw) ? back() : forward();
-	}
-
-	virtual void step(float dt) override {
-		if (is_alive()){
-			Animation::step(dt); // calculate the new y
-			entity->set_position(get_intermediate_position(home, target, y));
-		}
+	virtual void update(float y) override {
+		entity->set_position(get_intermediate_position(home, end, y));
 	}
 
 };

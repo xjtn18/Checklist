@@ -15,12 +15,13 @@ struct BorderedRect : public Entity {
 		rect.setFillColor(sf::Color::Transparent);
 
 		rect.setOutlineThickness(bw);
-		rect.setOutlineColor(VB_GREEN);
+		rect.setOutlineColor(COLOR_GREEN);
 	}
 
 
 	void update(float dt){
 		rect.setPosition(tf.x, tf.y);
+		rect.setFillColor(color);
 	}
 
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const {
@@ -48,12 +49,13 @@ struct BorderedCircle : public Entity {
 		circle.setFillColor(sf::Color::Transparent);
 
 		circle.setOutlineThickness(bw);
-		circle.setOutlineColor(VB_GREEN);
+		circle.setOutlineColor(COLOR_GREEN);
 	}
 
 
 	void update(float dt){
 		circle.setPosition(tf.x, tf.y);
+		//circle.setFillColor(color);
 	}
 
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const {
@@ -73,12 +75,13 @@ struct LineShape : public Entity {
 		: Entity(_tf)
 	{
 		line.setOrigin(_tf.w/2, _tf.h/2);
-		line.setFillColor(VB_GREEN);
+		line.setFillColor(COLOR_GREEN);
 		line.setSize({(float)tf.w, (float)tf.h});
 	}
 
 	void update(float dt){
 		line.setPosition(tf.x, tf.y);
+		line.setFillColor(color);
 	}
 
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const {
@@ -99,13 +102,14 @@ struct Circle : public Entity {
 		circle.setRadius(_rad);
 		circle.setPointCount(point_count);
 		//circle.setOrigin(_rad, _rad);
-		circle.setOutlineColor(VB_GREEN);
+		circle.setOutlineColor(COLOR_GREEN);
 		circle.setFillColor(sf::Color(0,0,0,0));
 		circle.setOutlineThickness(3);
 	}
 
 	void update(float dt){
 		circle.setPosition(tf.x, tf.y);
+		circle.setFillColor(color);
 	}
 
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const {

@@ -12,6 +12,8 @@ struct Item : public HStack {
 
 	Item(vb::Transform, const std::string&, int);
 	void check();
+
+	void update(float);
 };
 
 

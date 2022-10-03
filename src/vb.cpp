@@ -24,10 +24,12 @@ void load_fonts() {
 }
 
 // Colors
-const sf::Color VB_GREEN     = sf::Color(108, 161, 59);
-const sf::Color VB_RED       = sf::Color(255, 101, 74);
-const sf::Color VB_WHITE     = sf::Color(229, 240, 225);
-const sf::Color VBC_BG       = sf::Color(30, 34, 36);
+const sf::Color COLOR_GREEN     = sf::Color(108, 161, 59);
+const sf::Color COLOR_RED       = sf::Color(255, 101, 74);
+const sf::Color COLOR_WHITE     = sf::Color(229, 240, 225);
+const sf::Color COLOR_BG        = sf::Color(30, 34, 36);
+const sf::Color COLOR_DIM       = sf::Color(150, 150, 150, 20);
+const sf::Color COLOR_DEFAULT   = sf::Color(255, 255, 255, 255);
 
 
 
@@ -70,6 +72,18 @@ sf::Vector2f vb::get_intermediate_position(const sf::Vector2f& A, const sf::Vect
 uint8_t vb::get_intermediate_int(const uint8_t& source, const uint8_t& target, const float& n){
 	return (target-source) * n + source;
 }
+
+
+
+sf::Color vb::get_intermediate_color(const sf::Color& c1, const sf::Color& c2, float n, bool opacity_only){
+	uint8_t R = (opacity_only) ? c1.r : vb::get_intermediate_int(c1.r, c2.r, n);
+	uint8_t G = (opacity_only) ? c1.g : vb::get_intermediate_int(c1.g, c2.g, n);
+	uint8_t B = (opacity_only) ? c1.b : vb::get_intermediate_int(c1.b, c2.b, n);
+	uint8_t A = vb::get_intermediate_int(c1.a, c2.a, n);
+	return sf::Color(R,G,B,A);
+}
+
+
 
 std::string vb::trimmable(const std::string &s, int maxlen){
 	if (s.length() > maxlen) return s.substr(0,maxlen)+"..";
@@ -117,7 +131,6 @@ const char* vb::get_image(const char* filename){
 	strcat(pth, filename);
 	return pth;
 }
-
 
 
 

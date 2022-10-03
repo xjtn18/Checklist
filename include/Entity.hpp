@@ -8,15 +8,16 @@ struct Program; // FD
 
 struct Entity : public sf::Drawable {
 	vb::Transform tf;
+	sf::Color color;
 	bool engaged;
 
 	Entity(){}
 	Entity(vb::Transform _tf)
-		: tf(_tf), engaged(false)
+		: tf(_tf), color(COLOR_DEFAULT), engaged(false)
 	{ }
 
 	Entity(vb::Transform _tf, bool _engaged)
-		: tf(_tf), engaged(_engaged)
+		: tf(_tf), color(COLOR_DEFAULT), engaged(_engaged)
 	{ }
 
 	Entity(const Entity& other) = default;
@@ -32,6 +33,11 @@ struct Entity : public sf::Drawable {
 	void set_position(sf::Vector2f pos){
 		tf.x = pos.x;
 		tf.y = pos.y;
+	}
+
+
+	void set_color(sf::Color col){
+		color = col;
 	}
 
 	

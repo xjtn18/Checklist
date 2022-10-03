@@ -13,6 +13,7 @@ struct Menu : public VStack {
 
 	sf::RectangleShape select_rect;
 	std::vector<PositionAnimation> animations;
+	std::vector<ColorAnimation> color_animations;
 
 
 	Menu(){}

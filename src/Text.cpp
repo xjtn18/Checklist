@@ -16,14 +16,10 @@ Text::Text(std::string _content, vb::Transform _tf, int _fontsize, sf::Font& _fo
 	tf.w = bounds.width + bounds.left;
 	tf.h = max_bounds.height;
 
-	set_color(VB_WHITE);
+	set_color(COLOR_WHITE);
 	//center_yaxis();
 }
 
-
-void Text::set_color(sf::Color c){
-	txt.setFillColor(c);
-}
 
 void Text::set_text(const std::string& new_text){
 	txt.setString(new_text);
@@ -48,6 +44,7 @@ void Text::dimmer(){
 
 void Text::update(float dt){
 	txt.setPosition(tf.x, tf.y);
+	txt.setFillColor(color);
 }
 
 

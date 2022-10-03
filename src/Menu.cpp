@@ -8,6 +8,13 @@
 #include <sstream>
 #include <iomanip>
 #include <unordered_set>
+#include <fstream>
+
+
+
+static const std::string G_LIST_FILE = "lists/items.txt";
+
+
 
 
 Menu::Menu(vb::Transform _tf, int _padding)
@@ -15,22 +22,12 @@ Menu::Menu(vb::Transform _tf, int _padding)
 {
 	select_rect.setFillColor(sf::Color(60,60,60));
 
-	// Hard code the items in the checklist
-	add_item("animate concurrent checks");
-	add_item("integrate text fields");
-	add_item("change color scheme");
-	add_item("lerp the text opacity");
-
-	add_item("Evil mode");
-	add_item("Sawayama Solitaire");
-	add_item("Klondike");
-	add_item("Proletariats Patience");
-
-
-	add_item("Master Chief");
-	add_item("High Charity");
-	add_item("Truth, Mercy, and Regret");
-	add_item("Halo array");
+	// Read from items file
+	std::ifstream infile(G_LIST_FILE);
+	std::string line;
+	while (std::getline(infile, line)){
+		add_item(line);
+	}
 
 	VStack::update(0.0f);
 
@@ -86,10 +83,8 @@ sf::Vector2f Menu::get_position_of_entity(const int index){
 
 
 void Menu::toggle_item(const int &index){
-	//((Item*)entities[select_index])->check();
 	HStack* item = (HStack*)entities[index];
 	((Button*)item->entities[0])->press(); // 0, because the button the first element in the item hstack.
-	((Text*)item->entities[1])->dimmer(); // 0, because the button the first element in the item hstack.
 }
 
 
@@ -118,6 +113,10 @@ int Menu::get_index_to_last_unchecked_item(){
 
 void Menu::process_animations(float dt){
 	for (auto &anim : animations){
+		anim.step(dt);
+	}
+
+	for (auto &anim : color_animations){
 		anim.step(dt);
 	}
 }
@@ -159,30 +158,29 @@ bool Menu::is_item_currently_animating(const int index){
 
 
 void Menu::check_item(){
-	int last_unchecked_index = get_index_to_last_unchecked_item();
-
-	if (select_index == last_unchecked_index){
-		toggle_item(select_index);
-		return;
-	}
+	// Animate item opacity
+	color_animations.push_back( ColorAnimation(((HStack*)entities[select_index])->entities[0], COLOR_DIM, true) );
+	color_animations.push_back( ColorAnimation(((HStack*)entities[select_index])->entities[1], COLOR_DIM) );
 
 	int delay = 0;
 	int delay_seperation = 2;
 	bool last_item_was_static = false;
 
-	for (int i = select_index; i <= last_unchecked_index; ++i){
-		sf::Vector2f A = get_position_of_entity(i);
-		sf::Vector2f B = get_position_of_item((i == select_index) ? last_unchecked_index : i-1);
-		PositionAnimation anim = PositionAnimation(entities[i], A, B);
+	int last_unchecked_index = get_index_to_last_unchecked_item();
+	if (select_index != last_unchecked_index){
+		for (int i = select_index; i <= last_unchecked_index; ++i){
+			sf::Vector2f A = get_position_of_entity(i);
+			sf::Vector2f B = get_position_of_item((i == select_index) ? last_unchecked_index : i-1);
+			PositionAnimation anim = PositionAnimation(entities[i], A, B);
 
-		last_item_was_static = !is_item_currently_animating(i) || last_item_was_static;
-		delay += delay_seperation;
-		if (last_item_was_static){
-			anim.delay_target = delay;
+			last_item_was_static = !is_item_currently_animating(i) || last_item_was_static;
+			delay += delay_seperation;
+			if (last_item_was_static){
+				anim.delay = delay;
+			}
+
+			animations.push_back(std::move(anim));
 		}
-
-		anim.start();
-		animations.push_back(std::move(anim));
 	}
 
 	toggle_item(select_index);
@@ -194,32 +192,32 @@ void Menu::check_item(){
 
 
 void Menu::uncheck_item(){
-	int first_checked_index = get_index_to_first_checked_item();
-
-	if (select_index == first_checked_index){
-		toggle_item(select_index);
-		return;
-	}
+	// Animate item opacity
+	color_animations.push_back( ColorAnimation(((HStack*)entities[select_index])->entities[0], COLOR_GREEN, true) );
+	color_animations.push_back( ColorAnimation(((HStack*)entities[select_index])->entities[1], COLOR_WHITE) );
 
 	int delay = 0;
 	int delay_seperation = 2;
 	bool last_item_was_static = false;
 
-	for (int i = select_index; i >= first_checked_index; --i){
-		sf::Vector2f A = get_position_of_entity(i);
-		sf::Vector2f B = get_position_of_item((i == select_index) ? first_checked_index : i+1);
-		PositionAnimation anim = PositionAnimation(entities[i], A, B);
+	int first_checked_index = get_index_to_first_checked_item();
+	if (select_index != first_checked_index){
+		for (int i = select_index; i >= first_checked_index; --i){
+			sf::Vector2f A = get_position_of_entity(i);
+			sf::Vector2f B = get_position_of_item((i == select_index) ? first_checked_index : i+1);
+			PositionAnimation anim = PositionAnimation(entities[i], A, B);
 
 
-		last_item_was_static = !is_item_currently_animating(i) || last_item_was_static;
-		delay += delay_seperation;
-		if (last_item_was_static){
-			anim.delay_target = delay;
+			last_item_was_static = !is_item_currently_animating(i) || last_item_was_static;
+			delay += delay_seperation;
+			if (last_item_was_static){
+				anim.delay = delay;
+			}
+
+			animations.push_back(std::move(anim));
 		}
-
-		anim.start();
-		animations.push_back(std::move(anim));
 	}
+
 
 	toggle_item(select_index);
 
@@ -274,7 +272,6 @@ bool Menu::handler(sf::Event& event, Program& p){
 
 
 		case sf::Keyboard::Enter: // duplicate currently selected alarm
-
 			delete_stale_animations();
 
 			if (item_is_checked(select_index)){ // UNCHECKING AN ITEM

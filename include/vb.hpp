@@ -34,10 +34,12 @@ const float CENTER_WIN_X = WINW/2;
 const float CENTER_WIN_Y = WINH/2;
 
 // Colors
-extern const sf::Color VB_GREEN;
-extern const sf::Color VB_RED;
-extern const sf::Color VB_WHITE;
-extern const sf::Color VBC_BG;
+extern const sf::Color COLOR_GREEN;
+extern const sf::Color COLOR_RED;
+extern const sf::Color COLOR_WHITE;
+extern const sf::Color COLOR_BG;
+extern const sf::Color COLOR_DIM;
+extern const sf::Color COLOR_DEFAULT;
 
 //////////////////////////////////////////////////////////////////////
 ///////////////////////
@@ -212,6 +214,7 @@ namespace vb {
 
 	float distance(const sf::Vector2f& A, const sf::Vector2f& B);
 	sf::Vector2f get_intermediate_position(const sf::Vector2f& A, const sf::Vector2f& B, float n);
+	sf::Color get_intermediate_color(const sf::Color& c1, const sf::Color& c2, float n, bool = false);
 	uint8_t get_intermediate_int(const uint8_t& source, const uint8_t& target, const float& n);
 
 }

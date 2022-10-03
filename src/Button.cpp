@@ -9,7 +9,10 @@ Button::Button(vb::Transform tf)
 		outer_circle(new BorderedCircle(tf, Button::size, 2)),
 		activated(false)
 {
-	inner_circle->circle.setFillColor(VB_GREEN);
+	set_color(COLOR_GREEN);
+
+	//inner_circle->set_color(COLOR_GREEN);
+	//outer_circle->set_color(COLOR_GREEN);
 }
 
 
@@ -25,11 +28,14 @@ void Button::press(){
 
 
 void Button::update(float dt){
+	inner_circle->circle.setFillColor(color);
 	inner_circle->tf = tf;
 	inner_circle->tf.x += 4;
 	inner_circle->tf.y += 4;
 	inner_circle->update(dt);
 
+
+	outer_circle->circle.setOutlineColor(color);
 	outer_circle->tf = tf;
 	outer_circle->update(dt);
 
