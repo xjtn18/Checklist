@@ -10,6 +10,7 @@ struct Menu : public VStack {
 	//
 	bool editing = false;
 	int select_index = 0;
+	std::string name;
 
 	sf::RectangleShape select_rect;
 	std::vector<PositionAnimation> animations;
@@ -26,7 +27,7 @@ struct Menu : public VStack {
 	void set_all_idle();
 	void select_move(vb::Direc);
 	void set_select(const int);
-	void add_item(std::string);
+	void add_item(std::string, bool = false);
 	sf::Vector2f get_position_of_item(const int);
 	sf::Vector2f get_position_of_entity(const int);
 	void toggle_item(const int&);
@@ -39,6 +40,10 @@ struct Menu : public VStack {
 	void delete_stale_animations();
 	void uncheck_all();
 	bool is_item_currently_animating(const int);
+
+	std::string serialize();
+	void save();
+	void load(std::string);
 
 	void update(float);
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const;

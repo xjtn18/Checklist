@@ -12,31 +12,17 @@
 
 
 
-static const std::string G_LIST_FILE = "lists/items.txt";
-
-
-
-
 Menu::Menu(vb::Transform _tf, int _padding)
 	: VStack(_tf, _padding, {})
 {
 	select_rect.setFillColor(sf::Color(60,60,60));
-
-	// Read from items file
-	std::ifstream infile(G_LIST_FILE);
-	std::string line;
-	while (std::getline(infile, line)){
-		add_item(line);
-	}
-
 	VStack::update(0.0f);
-
 }
 
 
-void Menu::add_item(const std::string message){
+void Menu::add_item(const std::string message, bool item_set){
 	//insert(-1, new Item(tf, message, 10));
-	insert(-1, new HStack(tf, 10, std::vector<Entity*>{new Button(tf), new Text(message)}));
+	insert(-1, new HStack(tf, 10, std::vector<Entity*>{new Button(tf, item_set), new Text(message)}));
 }
 
 
@@ -90,14 +76,14 @@ void Menu::toggle_item(const int &index){
 
 bool Menu::item_is_checked(const int &index){
 	HStack* item = (HStack*)entities[index];
-	return ((Button*)item->entities[0])->is_activated();
+	return ((Button*)item->entities[0])->is_set();
 }
 
 
 int Menu::get_index_to_first_checked_item(){
 	for (int i = 0; i < size; ++i){
 		HStack* item = (HStack*)entities[i];
-		if (((Button*)item->entities[0])->is_activated()){ // 0, because the button the first element in the item hstack.
+		if (((Button*)item->entities[0])->is_set()){ // 0, because the button the first element in the item hstack.
 			return i;
 		}
 	}
@@ -234,6 +220,51 @@ void Menu::uncheck_all(){
 	}
 }
 
+
+
+
+std::string Menu::serialize(){
+	std::string serial;
+
+	for (Entity *ent : entities){
+		HStack* item = (HStack*)ent;
+		serial += (((Button*)item->entities[0])->is_set()) ? "1" : "0";
+		serial += ".";
+		serial += ((Text*)item->entities[1])->txt.getString();
+		serial += "\n";
+	}
+
+	return serial;
+}
+
+
+void Menu::save(){
+	std::ofstream file("lists/" + name + ".list");
+	dlog(serialize());
+	file << serialize();
+	file.close();
+}
+
+
+void Menu::load(std::string list_name){
+	name = list_name; // set the checklist name
+
+	std::ifstream file("lists/" + list_name + ".list");
+	std::string line, token;
+
+	while (std::getline(file, line)){
+		std::istringstream ss(line);
+
+		std::getline(ss, token, '.');
+		std::string state_str = token;
+		bool state = (state_str == "1") ? true : false;
+
+		std::getline(ss, token, '\n');
+		std::string message = token;
+
+		add_item(message, state);
+	}
+}
 
 
 

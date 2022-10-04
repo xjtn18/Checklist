@@ -5,14 +5,26 @@
 	- Get the text field and text cursor integrated to allow for inline item editing.
 	- Add save/load functionality of checklists that tracks check state.
 	- Change the color scheme.
+	- Add a 'new item' row in the list to add new items dynamically.
+	     Have it exist in at the end of the currently unchecked items ?
 
 ### FIXME
 	- figure out why VStack::update must be called in the update method of Menu in order to display the list correctly.
 	- Get the text and buttons to line up properly in the Menu no matter the size of the items.
 
 
+### REFACTOR
+	- Add indexing to support to VStacks/HStacks
+	- Handle opacity animations of item elements at the Button/Text level.
+		- Prevents code reptition, seperates logic, and prevents having to write messy casting chains in 'Menu'.
 
-### Log
+
+
+# Log
+
+### 10/3/22
+	- Finished basic save/load functionality for checklists.
+
 
 ### 10/1/22
 	- Moved duplciated code across all animation structs to the base Animation struct.

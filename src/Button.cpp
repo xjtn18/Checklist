@@ -4,10 +4,10 @@
 int Button::size = 25;
 
 
-Button::Button(vb::Transform tf)
+Button::Button(vb::Transform tf, bool s)
 	: inner_circle(new BorderedCircle(tf, Button::size-6, 0)),
 		outer_circle(new BorderedCircle(tf, Button::size, 2)),
-		activated(false)
+		set(s)
 {
 	set_color(COLOR_GREEN);
 
@@ -16,13 +16,13 @@ Button::Button(vb::Transform tf)
 }
 
 
-bool Button::is_activated(){
-	return activated;
+bool Button::is_set(){
+	return set;
 }
 
 
 void Button::press(){
-	activated = !activated;
+	set = !set;
 }
 
 
@@ -46,7 +46,7 @@ void Button::update(float dt){
 
 
 void Button::draw(sf::RenderTarget& target, sf::RenderStates states) const {
-	if (activated) inner_circle->draw(target, states);
+	if (set) inner_circle->draw(target, states);
 	outer_circle->draw(target, states);
 }
 

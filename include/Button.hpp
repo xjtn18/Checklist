@@ -8,11 +8,11 @@
 
 struct Button : public Entity {
 	BorderedCircle *inner_circle, *outer_circle;
-	bool activated;
+	bool set;
 	static int size;
 
-	Button(vb::Transform);
-	bool is_activated();
+	Button(vb::Transform, bool = false);
+	bool is_set();
 	void press();
 
 	void update(float dt);

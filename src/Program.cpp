@@ -48,6 +48,12 @@ Program::Program()
 
 
 void Program::set_pane_main(){
+	// load random list
+	//checklist->load("items.list");
+
+	// @NOTE: hardcode setting the check list to load for now.
+	checklist->load("items");
+
 	draw_list = {
 		checklist
 	};
@@ -84,6 +90,12 @@ void Program::quit(){
 	//
 	// Close the program window and clean up heap
 	//
+
+
+	// save the checklist before exiting
+	checklist->save();
+
+
 	window_ptr->close(); // close window
 	cleanup();
 }
