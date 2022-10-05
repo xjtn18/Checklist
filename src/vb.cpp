@@ -28,8 +28,9 @@ const sf::Color COLOR_GREEN     = sf::Color(108, 161, 59);
 const sf::Color COLOR_RED       = sf::Color(255, 101, 74);
 const sf::Color COLOR_WHITE     = sf::Color(229, 240, 225);
 const sf::Color COLOR_BG        = sf::Color(30, 34, 36);
-const sf::Color COLOR_DIM       = sf::Color(150, 150, 150, 20);
+const sf::Color COLOR_DIM       = sf::Color(150, 150, 150, 40);
 const sf::Color COLOR_DEFAULT   = sf::Color(255, 255, 255, 255);
+const int ALPHA_DIM             = 40;
 
 
 

@@ -40,6 +40,10 @@ struct Entity : public sf::Drawable {
 		color = col;
 	}
 
+	void set_alpha(int alpha){
+		color.a = alpha;
+	}
+
 	
 	void move(float x_offset, float y_offset, float mag, float dt){
 		tf.x += (x_offset * mag * dt);

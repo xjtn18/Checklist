@@ -3,7 +3,6 @@
 ### TODO
 	- Lerp the selector movement.
 	- Get the text field and text cursor integrated to allow for inline item editing.
-	- Add save/load functionality of checklists that tracks check state.
 	- Change the color scheme.
 	- Add a 'new item' row in the list to add new items dynamically.
 	     Have it exist in at the end of the currently unchecked items ?

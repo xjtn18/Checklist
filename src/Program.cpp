@@ -52,7 +52,7 @@ void Program::set_pane_main(){
 	//checklist->load("items.list");
 
 	// @NOTE: hardcode setting the check list to load for now.
-	checklist->load("items");
+	checklist->load("test_items");
 
 	draw_list = {
 		checklist

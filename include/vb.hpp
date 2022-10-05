@@ -40,6 +40,7 @@ extern const sf::Color COLOR_WHITE;
 extern const sf::Color COLOR_BG;
 extern const sf::Color COLOR_DIM;
 extern const sf::Color COLOR_DEFAULT;
+extern const int ALPHA_DIM;
 
 //////////////////////////////////////////////////////////////////////
 ///////////////////////

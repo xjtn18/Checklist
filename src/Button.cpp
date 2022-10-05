@@ -10,9 +10,7 @@ Button::Button(vb::Transform tf, bool s)
 		set(s)
 {
 	set_color(COLOR_GREEN);
-
-	//inner_circle->set_color(COLOR_GREEN);
-	//outer_circle->set_color(COLOR_GREEN);
+	if (set) set_alpha(ALPHA_DIM);
 }
 
 

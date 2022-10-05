@@ -21,8 +21,10 @@ Menu::Menu(vb::Transform _tf, int _padding)
 
 
 void Menu::add_item(const std::string message, bool item_set){
-	//insert(-1, new Item(tf, message, 10));
-	insert(-1, new HStack(tf, 10, std::vector<Entity*>{new Button(tf, item_set), new Text(message)}));
+	Text *text = new Text(message);
+	(item_set) ? text->set_color(COLOR_DIM) : text->set_color(COLOR_WHITE);
+
+	insert(-1, new HStack(tf, 10, std::vector<Entity*>{new Button(tf, item_set), text}));
 }
 
 
@@ -149,7 +151,7 @@ void Menu::check_item(){
 	color_animations.push_back( ColorAnimation(((HStack*)entities[select_index])->entities[1], COLOR_DIM) );
 
 	int delay = 0;
-	int delay_seperation = 2;
+	int delay_seperation = 3;
 	bool last_item_was_static = false;
 
 	int last_unchecked_index = get_index_to_last_unchecked_item();
@@ -183,7 +185,7 @@ void Menu::uncheck_item(){
 	color_animations.push_back( ColorAnimation(((HStack*)entities[select_index])->entities[1], COLOR_WHITE) );
 
 	int delay = 0;
-	int delay_seperation = 2;
+	int delay_seperation = 3;
 	bool last_item_was_static = false;
 
 	int first_checked_index = get_index_to_first_checked_item();
@@ -240,7 +242,6 @@ std::string Menu::serialize(){
 
 void Menu::save(){
 	std::ofstream file("lists/" + name + ".list");
-	dlog(serialize());
 	file << serialize();
 	file.close();
 }
