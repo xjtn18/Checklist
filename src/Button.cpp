@@ -39,6 +39,8 @@ void Button::update(float dt){
 
 	tf.w = Button::size*2-2*2;
 	tf.h = Button::size*2-2*2;
+
+	Entity::update(dt); // step through animations
 }
 
 

@@ -1,6 +1,8 @@
 #pragma once
 #include <vb.hpp>
 #include <cmath>
+#include <unordered_set>
+#include <Animation.hpp>
 
 
 struct Program; // FD
@@ -10,6 +12,9 @@ struct Entity : public sf::Drawable {
 	vb::Transform tf;
 	sf::Color color;
 	bool engaged;
+	PositionAnimation pos_anim;
+	ColorAnimation col_anim;
+
 
 	Entity(){}
 	Entity(vb::Transform _tf)
@@ -35,6 +40,10 @@ struct Entity : public sf::Drawable {
 		tf.y = pos.y;
 	}
 
+	sf::Vector2f get_position(){
+		return sf::Vector2f(tf.x, tf.y);
+	}
+
 
 	void set_color(sf::Color col){
 		color = col;
@@ -50,10 +59,18 @@ struct Entity : public sf::Drawable {
 		tf.y += (y_offset * mag * dt);
 	};
 
+
+
 	// static UI entities do not require defining these
 	virtual void engage(bool value)  {}
-	virtual void update(float dt)    {}
+
+	virtual void update(float dt){
+		pos_anim.step(dt);
+		col_anim.step(dt);
+	}
+
 	virtual bool handler(sf::Event& event, Program& p) {return false;}
+
 
 	// every entity will define a draw method
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const = 0;

@@ -2,9 +2,12 @@
 #include <Debug.hpp>
 #include <vb.hpp>
 #include <functional>
-#include <Entity.hpp>
+#include <cmath>
 
 using namespace vb;
+
+
+struct Entity; // FD
 
 
 template <typename T>
@@ -22,7 +25,10 @@ struct Animation {
 	std::function<void(float)> stepper;
 	std::function<void(void)> lambda_complete;
 
-	Animation(){}
+	Animation()
+		: dead(true)
+	{ }
+
 
 	Animation(T _home, T _end)
 		: x(0),
@@ -81,7 +87,7 @@ struct Animation {
 	}
 
 
-	virtual void step(float dt){
+	void step(float dt){
 		if (is_alive()){
 			tick(dt);
 			stepper(y);
@@ -163,6 +169,7 @@ struct AnimationChain : public Animation {
 
 
 
+/*
 struct ScaleAnimation : public Animation<float> {
 	///// Members /////
 	sf::Transformable *polygon;
@@ -185,6 +192,7 @@ struct ScaleAnimation : public Animation<float> {
 	}
 
 };
+*/
 
 
 
@@ -206,13 +214,7 @@ struct ColorAnimation : public Animation<sf::Color> {
 		: entity(nullptr)
 	{ }
 
-	ColorAnimation(Entity *ent, sf::Color b, bool oo = false)
-		: Animation<sf::Color>(ent->color, b),
-		  entity(ent),
-		  opacity_only(oo)
-	{
-		setup();
-	}
+	ColorAnimation(Entity *ent, sf::Color b, bool oo = false);
 
 
 	ColorAnimation(Entity *ent, sf::Color a, sf::Color b, bool oo = false)
@@ -222,6 +224,8 @@ struct ColorAnimation : public Animation<sf::Color> {
 	{
 		setup();
 	}
+	// @NOTE: I wonder if I can just call the other constructor from within this constructor
+	//             so we dont need a "setup" function.
 
 	void setup(){
 		rate = 5.0;
@@ -229,11 +233,7 @@ struct ColorAnimation : public Animation<sf::Color> {
 		inversef = [](float x) { return -x; }; // its inverse
 	}
 
-
-
-	virtual void update(float y) override {
-		entity->set_color(get_intermediate_color(home, end, y, opacity_only));
-	}
+	virtual void update(float);
 };
 
 
@@ -249,20 +249,26 @@ struct PositionAnimation : public Animation<sf::Vector2f> {
 
 	PositionAnimation() : entity(nullptr) { }
 
+
+	PositionAnimation(Entity *ent, sf::Vector2f b);
+
+
 	PositionAnimation(Entity *ent, sf::Vector2f a, sf::Vector2f b)
 		: Animation<sf::Vector2f>(a, b),
 		  entity(ent)
 	{
+		setup();
+	}
+
+
+	void setup(){
 		rate = 2.0;
 		f 			= [](float x) { return pow(-pow(1/(x/2 + 0.5) - 1, 3) + 1, 3); }; // fluid transition
 		inversef = [](float x) { return 2/((cbrt(cbrt(-x) + 1)) + 1) - 1; }; // its inverse
 	}
 
 
-	virtual void update(float y) override {
-		entity->set_position(get_intermediate_position(home, end, y));
-	}
-
+	virtual void update(float);
 };
 
 

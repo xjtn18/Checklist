@@ -25,6 +25,7 @@ void Menu::add_item(const std::string message, bool item_set){
 	(item_set) ? text->set_color(COLOR_DIM) : text->set_color(COLOR_WHITE);
 
 	insert(-1, new HStack(tf, 10, std::vector<Entity*>{new Button(tf, item_set), text}));
+	//insert(-1, new Item(tf, 10, std::vector<Entity*>{new Button(tf, item_set), text}));
 }
 
 
@@ -60,14 +61,10 @@ void Menu::set_selector(int index){
 }
 
 
-sf::Vector2f Menu::get_position_of_item(const int index){
+sf::Vector2f Menu::get_list_index_position(const int index){
 	return sf::Vector2f(tf.x, tf.y + entities[index]->tf.h * index + (padding * index));
 }
 
-
-sf::Vector2f Menu::get_position_of_entity(const int index){
-	return sf::Vector2f(entities[index]->tf.x, entities[index]->tf.y);
-}
 
 
 void Menu::toggle_item(const int &index){
@@ -99,56 +96,21 @@ int Menu::get_index_to_last_unchecked_item(){
 
 
 
-void Menu::process_animations(float dt){
-	for (auto &anim : animations){
-		anim.step(dt);
-	}
-
-	for (auto &anim : color_animations){
-		anim.step(dt);
-	}
-}
-
-
-void view_animations(std::vector<PositionAnimation> &animations){
-	for (auto &anim : animations){
-	   dlog(anim.entity);
-	}
-}
-
-
-void Menu::delete_stale_animations(){
-	std::unordered_set<Entity*> addresses;
-
-	for (int i = animations.size()-1; i >= 0; --i){
-		if (!animations[i].is_alive() || addresses.count(animations[i].entity)){
-			animations.erase(animations.begin() + i);
-		}
-		addresses.insert(animations[i].entity);
-	}
-
-	//view_animations(animations);
-}
-
-
-
 bool Menu::is_item_currently_animating(const int index){
-	if (index < 0 || index >= size) return false;
-
-	for (auto anim : animations){
-		if (anim.entity == entities[index]){
-			return true;
-		}
-	}
-	return false;
+	//if (index < 0 || index >= size) return false;
+	return entities[index]->pos_anim.is_alive();
 }
+
+
 
 
 
 void Menu::check_item(){
 	// Animate item opacity
-	color_animations.push_back( ColorAnimation(((HStack*)entities[select_index])->entities[0], COLOR_DIM, true) );
-	color_animations.push_back( ColorAnimation(((HStack*)entities[select_index])->entities[1], COLOR_DIM) );
+	Entity* button = ((HStack*)entities[select_index])->entities[0];
+	button->col_anim = ColorAnimation(button, COLOR_DIM, true);
+	Entity* text = ((HStack*)entities[select_index])->entities[1];
+	text->col_anim = ColorAnimation(text, COLOR_DIM);
 
 	int delay = 0;
 	int delay_seperation = 3;
@@ -157,9 +119,8 @@ void Menu::check_item(){
 	int last_unchecked_index = get_index_to_last_unchecked_item();
 	if (select_index != last_unchecked_index){
 		for (int i = select_index; i <= last_unchecked_index; ++i){
-			sf::Vector2f A = get_position_of_entity(i);
-			sf::Vector2f B = get_position_of_item((i == select_index) ? last_unchecked_index : i-1);
-			PositionAnimation anim = PositionAnimation(entities[i], A, B);
+			sf::Vector2f destination = get_list_index_position((i == select_index) ? last_unchecked_index : i-1);
+			PositionAnimation anim = PositionAnimation(entities[i], destination);
 
 			last_item_was_static = !is_item_currently_animating(i) || last_item_was_static;
 			delay += delay_seperation;
@@ -167,7 +128,7 @@ void Menu::check_item(){
 				anim.delay = delay;
 			}
 
-			animations.push_back(std::move(anim));
+			entities[i]->pos_anim = anim;
 		}
 	}
 
@@ -181,8 +142,10 @@ void Menu::check_item(){
 
 void Menu::uncheck_item(){
 	// Animate item opacity
-	color_animations.push_back( ColorAnimation(((HStack*)entities[select_index])->entities[0], COLOR_GREEN, true) );
-	color_animations.push_back( ColorAnimation(((HStack*)entities[select_index])->entities[1], COLOR_WHITE) );
+	Entity* button = ((HStack*)entities[select_index])->entities[0];
+	button->col_anim = ColorAnimation(button, COLOR_GREEN, true);
+	Entity* text = ((HStack*)entities[select_index])->entities[1];
+	text->col_anim = ColorAnimation(text, COLOR_WHITE);
 
 	int delay = 0;
 	int delay_seperation = 3;
@@ -191,9 +154,8 @@ void Menu::uncheck_item(){
 	int first_checked_index = get_index_to_first_checked_item();
 	if (select_index != first_checked_index){
 		for (int i = select_index; i >= first_checked_index; --i){
-			sf::Vector2f A = get_position_of_entity(i);
-			sf::Vector2f B = get_position_of_item((i == select_index) ? first_checked_index : i+1);
-			PositionAnimation anim = PositionAnimation(entities[i], A, B);
+			sf::Vector2f destination = get_list_index_position((i == select_index) ? first_checked_index : i+1);
+			PositionAnimation anim = PositionAnimation(entities[i], destination);
 
 
 			last_item_was_static = !is_item_currently_animating(i) || last_item_was_static;
@@ -202,7 +164,7 @@ void Menu::uncheck_item(){
 				anim.delay = delay;
 			}
 
-			animations.push_back(std::move(anim));
+			entities[i]->pos_anim = anim;
 		}
 	}
 
@@ -271,10 +233,8 @@ void Menu::load(std::string list_name){
 
 
 void Menu::update(float dt){
-	select_rect.setPosition(get_position_of_entity(select_index));
+	select_rect.setPosition(entities[select_index]->get_position());
 	select_rect.setSize(sf::Vector2f(entities[select_index]->tf.w, entities[select_index]->tf.h));
-
-	process_animations(dt);
 
    VStack::update(dt);
 }
@@ -304,7 +264,6 @@ bool Menu::handler(sf::Event& event, Program& p){
 
 
 		case sf::Keyboard::Enter: // duplicate currently selected alarm
-			delete_stale_animations();
 
 			if (item_is_checked(select_index)){ // UNCHECKING AN ITEM
 				uncheck_item();
@@ -314,14 +273,6 @@ bool Menu::handler(sf::Event& event, Program& p){
 			}
 
 			elements_currently_static = false;
-
-			delete_stale_animations();
-
-			// @NOTE(jacob) Deleting stale animations must happen before and after we check/uncheck
-			// the item for desired behavior. Only doing it before causes old animations to trigger
-			// overlapping items in the list. Only doing it after breaks delayed item shifting.
-			
-			//dlog(animations.size());
 
 
 			return true;

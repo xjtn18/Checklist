@@ -16,10 +16,21 @@
 	- Add indexing to support to VStacks/HStacks
 	- Handle opacity animations of item elements at the Button/Text level.
 		- Prevents code reptition, seperates logic, and prevents having to write messy casting chains in 'Menu'.
+	- Add methods to entities so that they can initialize their animations themselves.
+	- Incorporate the item class to get rid of the ugly Menu code currently used to set the animations for the button
+	   and text.
 
 
 
 # Log
+
+
+### 10/6/22
+	- Changed the way animations are processed. Now, every entity has a Position + Color Animation.
+	- Deleted functions for processing animations and deleting stale animations in Menu. Entities now carry
+	    their respective animations. This makes the code cleaner + the program more efficient.
+	- Shifted some method definitions in 'Animation' into a source file to fix circular dependency issue with 'Entity'.
+
 
 ### 10/3/22
 	- Finished basic save/load functionality for checklists.

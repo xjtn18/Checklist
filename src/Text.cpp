@@ -45,6 +45,7 @@ void Text::dimmer(){
 void Text::update(float dt){
 	txt.setPosition(tf.x, tf.y);
 	txt.setFillColor(color);
+	Entity::update(dt); // step through animations
 }
 
 

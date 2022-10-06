@@ -123,6 +123,8 @@ void HStack::update(float dt) {
 		tf.h = std::max(e->tf.h, tf.h);
 	}
 	tf.w -= padding;
+
+	Entity::update(dt); // step through animations
 }
 
 
