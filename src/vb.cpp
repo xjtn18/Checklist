@@ -24,12 +24,16 @@ void load_fonts() {
 }
 
 // Colors
-const sf::Color COLOR_GREEN     = sf::Color(108, 161, 59);
+const sf::Color COLOR_GREEN     = sf::Color(148, 182, 51);
 const sf::Color COLOR_RED       = sf::Color(255, 101, 74);
 const sf::Color COLOR_WHITE     = sf::Color(229, 240, 225);
 const sf::Color COLOR_BG        = sf::Color(30, 34, 36);
+const sf::Color COLOR_ORANGE    = sf::Color(234, 144, 36);
+const sf::Color COLOR_BLUE      = sf::Color(44, 101, 176);
+
+const sf::Color COLOR_BUTTON    = sf::Color(194, 160, 68);
 const sf::Color COLOR_DIM       = sf::Color(150, 150, 150, 40);
-const sf::Color COLOR_DEFAULT   = sf::Color(255, 255, 255, 255);
+const sf::Color COLOR_DEFAULT   = sf::Color(0, 255, 255, 255);
 const int ALPHA_DIM             = 40;
 
 

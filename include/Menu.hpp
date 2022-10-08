@@ -2,6 +2,7 @@
 #include <Entity.hpp>
 #include <Stack.hpp>
 #include <Animation.hpp>
+#include <Item.hpp>
 
 
 struct Menu : public VStack {
@@ -13,8 +14,6 @@ struct Menu : public VStack {
 	std::string name;
 
 	sf::RectangleShape select_rect;
-	std::vector<PositionAnimation> animations;
-	std::vector<ColorAnimation> color_animations;
 
 
 	Menu(){}
@@ -32,6 +31,7 @@ struct Menu : public VStack {
 	void toggle_item(const int&);
 	void check_item();
 	void uncheck_item();
+	Item& item(int);
 	bool item_is_checked(const int&);
 	int get_index_to_first_checked_item();
 	int get_index_to_last_unchecked_item();

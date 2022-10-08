@@ -38,6 +38,10 @@ extern const sf::Color COLOR_GREEN;
 extern const sf::Color COLOR_RED;
 extern const sf::Color COLOR_WHITE;
 extern const sf::Color COLOR_BG;
+extern const sf::Color COLOR_ORANGE;
+extern const sf::Color COLOR_BLUE;
+extern const sf::Color COLOR_BUTTON;
+
 extern const sf::Color COLOR_DIM;
 extern const sf::Color COLOR_DEFAULT;
 extern const int ALPHA_DIM;

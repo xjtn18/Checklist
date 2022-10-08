@@ -3,9 +3,9 @@
 ### TODO
 	- Lerp the selector movement.
 	- Get the text field and text cursor integrated to allow for inline item editing.
-	- Change the color scheme.
 	- Add a 'new item' row in the list to add new items dynamically.
-	     Have it exist in at the end of the currently unchecked items ?
+	     Have it exist at the end of the currently unchecked items ?
+	- Add mouse support
 
 ### FIXME
 	- figure out why VStack::update must be called in the update method of Menu in order to display the list correctly.
@@ -13,16 +13,18 @@
 
 
 ### REFACTOR
-	- Add indexing to support to VStacks/HStacks
-	- Handle opacity animations of item elements at the Button/Text level.
-		- Prevents code reptition, seperates logic, and prevents having to write messy casting chains in 'Menu'.
-	- Add methods to entities so that they can initialize their animations themselves.
-	- Incorporate the item class to get rid of the ugly Menu code currently used to set the animations for the button
-	   and text.
+	- Add index operator overloading to VStacks/HStacks.
 
 
 
 # Log
+
+### 10/7/22
+	- Changed color scheme and added some other new colors.
+	- Added 'item' method in Menu to get a reference to a specific item object in the list.
+	- Move color animations to 'Item' level; Menu did not need to handle that.
+	      - Toggle now sets the color animations for the button and text content.
+	      - This fixed coloring bug when pressing 'f' to clear all checked items.
 
 
 ### 10/6/22

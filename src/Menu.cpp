@@ -1,9 +1,9 @@
 #include <Menu.hpp>
 #include <Program.hpp>
-#include <Item.hpp>
-#include <Text.hpp>
 #include <Shapes.hpp>
 #include <Button.hpp>
+#include <Text.hpp>
+
 #include <algorithm>
 #include <sstream>
 #include <iomanip>
@@ -15,17 +15,16 @@
 Menu::Menu(vb::Transform _tf, int _padding)
 	: VStack(_tf, _padding, {})
 {
-	select_rect.setFillColor(sf::Color(60,60,60));
+	sf::Color scol = COLOR_ORANGE;
+	scol.a = 20;
+	select_rect.setFillColor(scol);
 	VStack::update(0.0f);
 }
 
 
 void Menu::add_item(const std::string message, bool item_set){
-	Text *text = new Text(message);
-	(item_set) ? text->set_color(COLOR_DIM) : text->set_color(COLOR_WHITE);
-
-	insert(-1, new HStack(tf, 10, std::vector<Entity*>{new Button(tf, item_set), text}));
-	//insert(-1, new Item(tf, 10, std::vector<Entity*>{new Button(tf, item_set), text}));
+	//insert(-1, new HStack(tf, 10, std::vector<Entity*>{new Button(tf, item_set), text}));
+	insert(-1, new Item(tf, 10, message, item_set));
 }
 
 
@@ -66,23 +65,26 @@ sf::Vector2f Menu::get_list_index_position(const int index){
 }
 
 
+Item& Menu::item(int index){
+	return *((Item*)entities[index]);
+}
+
 
 void Menu::toggle_item(const int &index){
-	HStack* item = (HStack*)entities[index];
-	((Button*)item->entities[0])->press(); // 0, because the button the first element in the item hstack.
+	item(index).check();
 }
 
 
 bool Menu::item_is_checked(const int &index){
-	HStack* item = (HStack*)entities[index];
-	return ((Button*)item->entities[0])->is_set();
+	//HStack* it = (HStack*)entities[index];
+   //return ((Button*)it->entities[0])->is_set();
+	return item(index).is_checked();
 }
 
 
 int Menu::get_index_to_first_checked_item(){
 	for (int i = 0; i < size; ++i){
-		HStack* item = (HStack*)entities[i];
-		if (((Button*)item->entities[0])->is_set()){ // 0, because the button the first element in the item hstack.
+		if (item(i).is_checked()){ // 0, because the button the first element in the item hstack.
 			return i;
 		}
 	}
@@ -104,14 +106,7 @@ bool Menu::is_item_currently_animating(const int index){
 
 
 
-
 void Menu::check_item(){
-	// Animate item opacity
-	Entity* button = ((HStack*)entities[select_index])->entities[0];
-	button->col_anim = ColorAnimation(button, COLOR_DIM, true);
-	Entity* text = ((HStack*)entities[select_index])->entities[1];
-	text->col_anim = ColorAnimation(text, COLOR_DIM);
-
 	int delay = 0;
 	int delay_seperation = 3;
 	bool last_item_was_static = false;
@@ -120,15 +115,15 @@ void Menu::check_item(){
 	if (select_index != last_unchecked_index){
 		for (int i = select_index; i <= last_unchecked_index; ++i){
 			sf::Vector2f destination = get_list_index_position((i == select_index) ? last_unchecked_index : i-1);
-			PositionAnimation anim = PositionAnimation(entities[i], destination);
+			int anim_delay = 0;
 
 			last_item_was_static = !is_item_currently_animating(i) || last_item_was_static;
 			delay += delay_seperation;
 			if (last_item_was_static){
-				anim.delay = delay;
+				anim_delay = delay;
 			}
 
-			entities[i]->pos_anim = anim;
+			entities[i]->animate_position_to(destination, anim_delay);
 		}
 	}
 
@@ -141,12 +136,6 @@ void Menu::check_item(){
 
 
 void Menu::uncheck_item(){
-	// Animate item opacity
-	Entity* button = ((HStack*)entities[select_index])->entities[0];
-	button->col_anim = ColorAnimation(button, COLOR_GREEN, true);
-	Entity* text = ((HStack*)entities[select_index])->entities[1];
-	text->col_anim = ColorAnimation(text, COLOR_WHITE);
-
 	int delay = 0;
 	int delay_seperation = 3;
 	bool last_item_was_static = false;
@@ -155,19 +144,17 @@ void Menu::uncheck_item(){
 	if (select_index != first_checked_index){
 		for (int i = select_index; i >= first_checked_index; --i){
 			sf::Vector2f destination = get_list_index_position((i == select_index) ? first_checked_index : i+1);
-			PositionAnimation anim = PositionAnimation(entities[i], destination);
-
+			int anim_delay = 0;
 
 			last_item_was_static = !is_item_currently_animating(i) || last_item_was_static;
 			delay += delay_seperation;
 			if (last_item_was_static){
-				anim.delay = delay;
+				anim_delay = delay;
 			}
 
-			entities[i]->pos_anim = anim;
+			entities[i]->animate_position_to(destination, anim_delay);
 		}
 	}
-
 
 	toggle_item(select_index);
 
@@ -190,11 +177,11 @@ void Menu::uncheck_all(){
 std::string Menu::serialize(){
 	std::string serial;
 
-	for (Entity *ent : entities){
-		HStack* item = (HStack*)ent;
-		serial += (((Button*)item->entities[0])->is_set()) ? "1" : "0";
+	for (int i = 0; i < size; ++i){
+		Item it = item(i);
+		serial += (it.is_checked()) ? "1" : "0";
 		serial += ".";
-		serial += ((Text*)item->entities[1])->txt.getString();
+		serial += it.content->txt.getString();
 		serial += "\n";
 	}
 
@@ -216,6 +203,7 @@ void Menu::load(std::string list_name){
 	std::string line, token;
 
 	while (std::getline(file, line)){
+
 		std::istringstream ss(line);
 
 		std::getline(ss, token, '.');

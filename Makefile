@@ -114,7 +114,7 @@ release:
 portable: release
 	@ rm -rf $@
 	@ mkdir $@
-	@ cp -r $(DIR-RLS)/bin/* res $@
+	@ cp -r $(DIR-RLS)/bin/* res lists $@
 
 
 run-debug:

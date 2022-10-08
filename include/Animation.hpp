@@ -207,20 +207,20 @@ struct ScaleAnimation : public Animation<float> {
 struct ColorAnimation : public Animation<sf::Color> {
 	///// Members /////
 	Entity *entity;
-	bool opacity_only;
+	bool alpha_only;
 	///////////////////
 
 	ColorAnimation()
 		: entity(nullptr)
 	{ }
 
-	ColorAnimation(Entity *ent, sf::Color b, bool oo = false);
+	ColorAnimation(Entity *ent, sf::Color b, bool ao = false);
 
 
-	ColorAnimation(Entity *ent, sf::Color a, sf::Color b, bool oo = false)
+	ColorAnimation(Entity *ent, sf::Color a, sf::Color b, bool ao = false)
 		: Animation<sf::Color>(a, b),
 		  entity(ent),
-		  opacity_only(oo)
+		  alpha_only(ao)
 	{
 		setup();
 	}

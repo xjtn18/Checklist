@@ -53,6 +53,17 @@ struct Entity : public sf::Drawable {
 		color.a = alpha;
 	}
 
+
+	void animate_position_to(sf::Vector2f target_position, int delay = 0){
+		auto anim = PositionAnimation(this, target_position);
+		anim.delay = delay;
+		pos_anim = std::move(anim);
+	}
+
+	void animate_color_to(sf::Color target_color, bool alpha_only = false){
+		col_anim = std::move(ColorAnimation(this, target_color, alpha_only));
+	}
+
 	
 	void move(float x_offset, float y_offset, float mag, float dt){
 		tf.x += (x_offset * mag * dt);

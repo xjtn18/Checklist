@@ -15,7 +15,7 @@ struct BorderedRect : public Entity {
 		rect.setFillColor(sf::Color::Transparent);
 
 		rect.setOutlineThickness(bw);
-		rect.setOutlineColor(COLOR_GREEN);
+		//rect.setOutlineColor(COLOR_GREEN);
 	}
 
 
@@ -49,7 +49,7 @@ struct BorderedCircle : public Entity {
 		circle.setFillColor(sf::Color::Transparent);
 
 		circle.setOutlineThickness(bw);
-		circle.setOutlineColor(COLOR_GREEN);
+		//circle.setOutlineColor(COLOR_GREEN);
 	}
 
 
@@ -102,8 +102,6 @@ struct Circle : public Entity {
 		circle.setRadius(_rad);
 		circle.setPointCount(point_count);
 		//circle.setOrigin(_rad, _rad);
-		circle.setOutlineColor(COLOR_GREEN);
-		circle.setFillColor(sf::Color(0,0,0,0));
 		circle.setOutlineThickness(3);
 	}
 

@@ -6,12 +6,12 @@
 
 
 struct Item : public HStack {
-	bool is_checked;
 	Button *button;
-	Text *message;
+	Text *content;
 
-	Item(vb::Transform, const std::string&, int, bool);
+	Item(vb::Transform, int, const std::string &, bool);
 	void check();
+	bool is_checked();
 
 	void update(float);
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const;

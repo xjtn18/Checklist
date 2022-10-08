@@ -9,8 +9,6 @@ Button::Button(vb::Transform tf, bool s)
 		outer_circle(new BorderedCircle(tf, Button::size, 2)),
 		set(s)
 {
-	set_color(COLOR_GREEN);
-	if (set) set_alpha(ALPHA_DIM);
 }
 
 

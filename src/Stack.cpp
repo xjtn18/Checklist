@@ -53,6 +53,8 @@ void VStack::update(float dt) {
 		tf.w = std::max(e->tf.w, tf.w);
 	}
 	tf.h -= padding;
+
+	Entity::update(dt); // step through animations
 }
 
 

@@ -5,10 +5,10 @@
 
 // Color Animation
 
-ColorAnimation::ColorAnimation(Entity *ent, sf::Color b, bool oo)
+ColorAnimation::ColorAnimation(Entity *ent, sf::Color b, bool ao)
 	: Animation<sf::Color>(ent->color, b),
 		entity(ent),
-		opacity_only(oo)
+		alpha_only(ao)
 {
 	setup();
 }
@@ -16,7 +16,7 @@ ColorAnimation::ColorAnimation(Entity *ent, sf::Color b, bool oo)
 
 
 void ColorAnimation::update(float y) {
-	entity->set_color(get_intermediate_color(home, end, y, opacity_only));
+	entity->set_color(get_intermediate_color(home, end, y, alpha_only));
 }
 
 
